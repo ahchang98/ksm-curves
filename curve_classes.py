@@ -1,5 +1,4 @@
 # BeanieTools: Curve Creator
-# 5/29/2022
 
 class Position:
 	def __init__(self, input_measure, input_numerator, input_denominator):
@@ -14,3 +13,8 @@ class Curve:
 		self.end = input_end
 		self.curvature = input_curvature
 		self.wide = wide_flag
+
+class Beat:
+	def __init__(self, input_top, input_bottom):
+		self.top = input_top
+		self.bottom = input_bottom

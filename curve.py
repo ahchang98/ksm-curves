@@ -1,36 +1,52 @@
 # BeanieTools: Curve Creator
-# 5/29/2022
 
-import argparse
+import argparse, re
 from curve_classes import Position, Curve
 from curve_methods_main import modify_ksh
 
 parser = argparse.ArgumentParser(description='Generate a curve.')
-parser.add_argument('filename', help='the ksh filename (string)')
-parser.add_argument('-o', '--overwrite', action='store_true', help='for overwriting existing ksh file')
-parser.add_argument('start_measure_number', type=int, help='start measure number (int)')
-parser.add_argument('start_note_num', type=int, help='start note numerator (int)')
-parser.add_argument('start_note_den', type=int, help='start note denominator (int)')
-parser.add_argument('end_measure_number', type=int, help='end measure number (int)')
-parser.add_argument('end_note_num', type=int, help='end note numerator (int)')
-parser.add_argument('end_note_den', type=int, help='end note denominator (int)')
-parser.add_argument('laser_color', metavar='laser_color', choices=['B', 'R'], default=1, help='\'B\' for Blue, \'R\' for Red')
+parser.add_argument('filename', help='string = the ksh filename')
+parser.add_argument('start_data', help='int:int/int = start measure number : note numerator / denominator ')
+parser.add_argument('end_data', help='int:int/int = end measure number : note numerator / denominator ')
+parser.add_argument('laser_data', help='x:char-char = laser color B or R : start - end')
+parser.add_argument('laser_curvature', nargs='?', default=argparse.SUPPRESS, help='float = laser curvature')
+
 parser.add_argument('-w', '--wide', action='store_true', help='for wide lasers')
-parser.add_argument('laser_start_loc', help='laser start location (char)')
-parser.add_argument('laser_end_loc', help='laser end location (char)')
-parser.add_argument('curvature', type=float, help='curvature of laser (float)')
-parser.add_argument('-e', '--erase', action='store_true', help='for erasing existing laser; ignores laser locations, curvature, -w/--wide')
+parser.add_argument('-o', '--overwrite', action='store_true', help='for overwriting existing ksh file')
+parser.add_argument('-e', '--erase', action='store_true', help='for erasing existing laser; curvature ignored')
 
 args = parser.parse_args()
 
-# EXECUTION
-output_name = modify_ksh(args.filename,
-	Position(args.start_measure_number, args.start_note_num, args.start_note_den),
-	Position(args.end_measure_number, args.end_note_num, args.end_note_den), 
-	Curve(args.laser_color, str.encode(args.laser_start_loc), str.encode(args.laser_end_loc), args.curvature, args.wide),
-	args.erase, args.overwrite)
+start_split = re.split(r'[:/]', args.start_data)
+start_measure_number = int(start_split[0])
+start_note_num = int(start_split[1])
+start_note_den = int(start_split[2])
+
+end_split = re.split(r'[:/]', args.end_data)
+end_measure_number = int(end_split[0])
+end_note_num = int(end_split[1])
+end_note_den = int(end_split[2])
+
+laser_split = re.split(r'[:\-]', args.laser_data)
+laser_color = laser_split[0]
 
 if not args.erase:
+	laser_start_loc = str.encode(laser_split[1])
+	laser_end_loc = str.encode(laser_split[2])
+	curvature = float(args.laser_curvature)
+
+	output_name = modify_ksh(args.filename,
+		Position(start_measure_number, start_note_num, start_note_den),
+		Position(end_measure_number, end_note_num, end_note_den),
+		Curve(laser_color, laser_start_loc, laser_end_loc, curvature, args.wide),
+		args.erase, args.overwrite)
+
 	print('Curve generated in file ' + output_name)
 else:
+	output_name = modify_ksh(args.filename,
+		Position(start_measure_number, start_note_num, start_note_den),
+		Position(end_measure_number, end_note_num, end_note_den),
+		Curve(laser_color, b'0', b'0', 0, args.wide),
+		args.erase, args.overwrite)
+
 	print('Curve erased in file ' + output_name)
