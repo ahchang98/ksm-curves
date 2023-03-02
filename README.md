@@ -8,6 +8,8 @@ Run the following for help:
 
     python curve.py -h
 
+Recommended to save file in KSM editor after opening file with generated curve
+
 ## Notes
 - Laser locations
   - Normal: *05AFKPUZejo*
@@ -19,3 +21,5 @@ Run the following for help:
 ## Warnings
 - Curvature behaves badly for values too large
 - If getting wide lasers without -w/--wide, there may be an existing wide laser directive in ksh file
+- Avoid trying to erase a laser in the middle of a segment; the whole segment could be erased unintentionally
+- If the previous laser segment ends in a slam, generating a curve at the slam could erase the previous segment
